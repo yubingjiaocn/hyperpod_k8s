@@ -30,6 +30,8 @@ fi
 
 echo "Running lifecycle_script.py with resourceConfig: $SAGEMAKER_RESOURCE_CONFIG_PATH"
 
+echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo tee -a /etc/hosts
+
 python3.9 -u lifecycle_script.py -rc $SAGEMAKER_RESOURCE_CONFIG_PATH 2>&1 | tee -a $LOG_FILE
 
 exit_code=$?
