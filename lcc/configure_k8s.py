@@ -305,7 +305,7 @@ def init_worker_node():
 def add_labels_to_nodes():
 
     print("---")
-    print(f"Adding label (node.kubernetes.io/instance-type) to nodes")
+    print(f"Adding label to nodes")
     cluster_name = ResourceConfig.instance().get_cluster_name()
 
     for instance in ResourceConfig.instance().iter_instances():
@@ -326,6 +326,8 @@ def configure_k8s():
     install_kubernetes()
 
     init_worker_node()
+
+    add_labels_to_nodes()
 
     print("---")
     print("Finished Kubernetes configuration steps")
