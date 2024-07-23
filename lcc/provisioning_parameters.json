@@ -1,0 +1,10 @@
+{
+    "version": "1.0.0",
+    "workload_manager": "slurm",
+    "worker_groups": [
+        {
+            "instance_group_name": "WorkerGroup",
+            "partition_name": "dev"
+        }
+    ]
+}

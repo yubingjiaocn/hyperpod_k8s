@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: myhello
+  name: hello-deployment
+  labels:
+    app: hello
+spec:
+  selector:
+    matchLabels:
+      app: hello
+  replicas: 3
+  template:
+    metadata:
+      name: hello
+      labels:
+        app: hello
+    spec:
+      containers:
+        - name: myhello
+          image: 842413447717.dkr.ecr.us-west-2.amazonaws.com/myhello:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: fsx
+              mountPath: /fsx
+      volumes:
+        - name: fsx
+          hostPath:
+            path: /fsx
+            type: Directory
+      imagePullSecrets:
+        - name: regcred
