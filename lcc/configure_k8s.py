@@ -286,35 +286,10 @@ def init_worker_node():
     # https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-join/
 
     print("---")
-    print("Getting join token from master node.")
-
-    t0 = time.time()
-    while True:
-        join_info = get_join_info_from_secret()
-        if join_info is not None:
-            break
-        if time.time() - t0 >= join_info_timeout:
-            raise TimeoutError("Getting join token timed out.")
-        print("Join information is not ready in SecretsManager. Retrying...")
-        time.sleep(10)
-
-    print("---")
     print("Joining to the cluster")
+
+    join_info = get_join_info_from_secret()
     run_subprocess_wrap([ *sudo_command, "kubeadm", "join", join_info["master_addr_port"], "--token", join_info["token"], "--discovery-token-ca-cert-hash", "sha256:"+join_info["discovery_token_ca_cert_hash"] ])
-
-def add_labels_to_nodes():
-
-    print("---")
-    print(f"Adding label to nodes")
-    cluster_name = ResourceConfig.instance().get_cluster_name()
-
-    for instance in ResourceConfig.instance().iter_instances():
-        name = instance["Name"]
-        instance_type = instance["InstanceType"]
-
-        run_subprocess_wrap( [ "kubectl", "label", "node", name, f"node.kubernetes.io/instance-type={instance_type}" ] )
-        run_subprocess_wrap( [ "kubectl", "label", "node", name, f"sagemaker.aws.dev/cluster={cluster_name}" ] )
-        run_subprocess_wrap( [ "kubectl", "label", "node", name, f"sagemaker.aws.dev/launch-type=HyperPod" ] )
 
 def configure_k8s():
 
@@ -326,8 +301,6 @@ def configure_k8s():
     install_kubernetes()
 
     init_worker_node()
-
-    add_labels_to_nodes()
 
     print("---")
     print("Finished Kubernetes configuration steps")
