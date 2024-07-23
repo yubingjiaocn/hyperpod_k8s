@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
-from enum import Enum
 import json
-import os
 import socket
 import subprocess
-import time
 from typing import Any, Dict, List, Optional, Tuple
 
 class ExecuteBashScript:
@@ -69,7 +66,7 @@ def main(args):
 
     ExecuteBashScript("./apply_hotfix.sh").run()
 
-    ExecuteBashScript("./utils/install_docker.sh").run()
+    ExecuteBashScript("./utils/install_containerd.sh").run()
 
     subprocess.run(["sudo", "-u", "ubuntu", "python3.9", "-u", "./configure_k8s.py"], check=True)
 

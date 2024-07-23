@@ -11,8 +11,6 @@ logger() {
   echo "$@" | tee -a $LOG_FILE
 }
 
-PROVISIONING_PARAMETERS_PATH="provisioning_parameters.json"
-
 if [[ -z "$SAGEMAKER_RESOURCE_CONFIG_PATH" ]]; then
   logger "Env var SAGEMAKER_RESOURCE_CONFIG_PATH is unset, trying to read from default location path"
   SAGEMAKER_RESOURCE_CONFIG_PATH="/opt/ml/config/resource_config.json"
@@ -30,9 +28,9 @@ else
   fi
 fi
 
-logger "Running lifecycle_script.py with resourceConfig: $SAGEMAKER_RESOURCE_CONFIG_PATH"
+echo "Running lifecycle_script.py with resourceConfig: $SAGEMAKER_RESOURCE_CONFIG_PATH"
 
-python3.9 -u lifecycle_script.py -rc $SAGEMAKER_RESOURCE_CONFIG_PATH >>(tee -a $LOG_FILE) 2>&1
+python3.9 -u lifecycle_script.py -rc $SAGEMAKER_RESOURCE_CONFIG_PATH 2>&1 | tee -a $LOG_FILE
 
 exit_code=$?
 

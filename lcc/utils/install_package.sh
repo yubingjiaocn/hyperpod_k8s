@@ -6,7 +6,7 @@ set -exuo pipefail
 export NEEDRESTART_MODE=a
 export DEBIAN_FRONTEND=noninteractive
 
-apt -o -q DPkg::Lock::Timeout=120 update
+apt -q -o DPkg::Lock::Timeout=120 update
 
 declare -a PKG=(git unzip tree most fio dstat dos2unix tig jq ncdu inxi mediainfo git-lfs nvme-cli aria2 ripgrep bat python3-venv python3-pip ca-certificates curl gnupg lsb-release)
 [[ $(apt-cache search ^duf$) ]] && PKG+=(duf)
