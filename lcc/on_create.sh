@@ -30,11 +30,9 @@ else
   fi
 fi
 
-logger "Running lifecycle_script.py with resourceConfig: $SAGEMAKER_RESOURCE_CONFIG_PATH, provisioning_parameters: $PROVISIONING_PARAMETERS_PATH"
+logger "Running lifecycle_script.py with resourceConfig: $SAGEMAKER_RESOURCE_CONFIG_PATH"
 
-python3.9 -u lifecycle_script.py \
-  -rc $SAGEMAKER_RESOURCE_CONFIG_PATH \
-  -pp $PROVISIONING_PARAMETERS_PATH >  >(tee -a $LOG_FILE) 2>&1
+python3.9 -u lifecycle_script.py -rc $SAGEMAKER_RESOURCE_CONFIG_PATH >>(tee -a $LOG_FILE) 2>&1
 
 exit_code=$?
 

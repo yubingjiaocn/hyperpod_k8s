@@ -2,9 +2,6 @@
 
 echo 'BEGIN: apply hotfix'
 
-# Future proof in case node type is needed.
-[[ "$1" == "" ]] && NODE_TYPE=other || NODE_TYPE="$1"
-
 set -exuo pipefail
 
 BIN_DIR=$(dirname $(realpath ${BASH_SOURCE[@]}))
@@ -20,7 +17,7 @@ declare -a PKGS_SCRIPTS=(
 # )
 
 # Save a few 'apt-get update' on hotfix scripts (unless they add new repo).
-apt-get -y -o DPkg::Lock::Timeout=120 update
+apt-get -y -q -o DPkg::Lock::Timeout=120 update
 
 for i in $BIN_DIR/hotfix/*.sh; do
     bash -x $i

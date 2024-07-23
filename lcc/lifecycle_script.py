@@ -9,14 +9,6 @@ import subprocess
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
-SLURM_CONF = os.getenv("SLURM_CONF", "/opt/slurm/etc/slurm.conf")
-
-class SlurmNodeType(str, Enum):
-    HEAD_NODE = "controller"
-    LOGIN_NODE = "login"
-    COMPUTE_NODE = "compute"
-
-
 class ExecuteBashScript:
     def __init__(self, script_name: str):
         self.script_name = script_name
@@ -26,7 +18,6 @@ class ExecuteBashScript:
         result = subprocess.run(["sudo", "bash", self.script_name, *args])
         result.check_returncode()
         print(f"Script {self.script_name} executed successully")
-
 
 class ResourceConfig:
     INSTANCE_GROUP_NAME = "Name"
@@ -51,18 +42,6 @@ class ResourceConfig:
             return [i.get(ResourceConfig.CUSTOMER_IP_ADDRESS) for i in group["Instances"]]
         return []
 
-
-class ProvisioningParameters:
-    WORKLOAD_MANAGER_KEY: str = "workload_manager"
-
-    def __init__(self, path: str):
-        with open(path, "r") as f:
-            self._params = json.load(f)
-
-    @property
-    def workload_manager(self) -> Optional[str]:
-        return self._params.get(ProvisioningParameters.WORKLOAD_MANAGER_KEY)
-
 def get_ip_address():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
@@ -75,55 +54,6 @@ def get_ip_address():
         s.close()
     return IP
 
-
-def wait_for_slurm_conf(controllers: List[str]) -> bool:
-    """
-    SageMaker agents do a slurm configuration. Wait for a signal that slurm is ready to start.
-    This means that we can start controller, or do additional setup
-    Returns:
-        bool: True if valid slurm configuration found
-    """
-    sleep = 5 # sec
-    timeout = 60  # sec
-    for i in range(timeout // sleep):
-        if not os.path.exists(SLURM_CONF):
-            print("slurm.conf is not present. It is fine for login/compute nodes")
-            return True
-        with open(SLURM_CONF, "rt") as f:
-            data = f.read()
-            # check if controller information is present
-            for ip in controllers:
-                if ip in data:
-                    print("slurm.conf found. It contains at least one controller address")
-                    return True
-        time.sleep(sleep)
-    return False
-
-def wait_for_scontrol():
-    """
-    Checks if 'scontrol show nodes' command returns output within specified time.
-    This means we can proceed with install scripts which require nodes to be registered with slurm.
-    Returns:
-        bool: True if the command returns output from scontrol within the specified time, False otherwise.
-    """
-    timeout = 120
-    sleep = 5
-    for i in range (timeout // sleep):
-        try:
-            output = subprocess.check_output(['scontrol', 'show', 'nodes'])
-            if output.strip():
-                print("Nodes registered with Slurm, Proceeding with install scripts.", output)
-                return True
-        except subprocess.CalledProcessError:
-            pass
-
-        print(f"Waiting for output. Retrying in {sleep} seconds...")
-        time.sleep(sleep)
-
-    print(f"Exceeded maximum wait time of {timeout} seconds. No output from scontrol.")
-    return False
-
-
 def main(args):
     resource_config = ResourceConfig(args.resource_config)
 
@@ -135,9 +65,9 @@ def main(args):
         raise ValueError("This instance not found in resource config. Can't process")
     print(group)
 
-    node_type = SlurmNodeType.COMPUTE_NODE
+    ExecuteBashScript("./utils/install_package.sh").run()
 
-    ExecuteBashScript("./apply_hotfix.sh").run(node_type)
+    ExecuteBashScript("./apply_hotfix.sh").run()
 
     ExecuteBashScript("./utils/install_docker.sh").run()
 
@@ -145,11 +75,9 @@ def main(args):
 
     print("[INFO]: Success: All provisioning scripts completed")
 
-
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
     parser.add_argument("-rc", "--resource_config", help="Resource config JSON file containing Ip_address of head, login and compute nodes")
-    parser.add_argument("-pp", "--provisioning_parameters", help="Provisioning Parameters containing the head, login and compute ID/names")
     args=parser.parse_args()
 
     main(args)

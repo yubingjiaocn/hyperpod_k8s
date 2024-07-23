@@ -6,13 +6,12 @@ set -exuo pipefail
 export NEEDRESTART_MODE=a
 export DEBIAN_FRONTEND=noninteractive
 
-add-apt-repository ppa:git-core/ppa -y
-apt -o DPkg::Lock::Timeout=120 update
+apt -o -q DPkg::Lock::Timeout=120 update
 
-declare -a PKG=(git unzip tree most fio dstat dos2unix tig jq ncdu inxi mediainfo git-lfs nvme-cli aria2 ripgrep bat python3-venv python3-pip)
+declare -a PKG=(git unzip tree most fio dstat dos2unix tig jq ncdu inxi mediainfo git-lfs nvme-cli aria2 ripgrep bat python3-venv python3-pip ca-certificates curl gnupg lsb-release)
 [[ $(apt-cache search ^duf$) ]] && PKG+=(duf)
 
-apt-get -y -o DPkg::Lock::Timeout=120 install "${PKG[@]}"
+apt-get -q -y -o DPkg::Lock::Timeout=120 install "${PKG[@]}"
 [[ -e /usr/bin/batcat ]] && ln -s /usr/bin/batcat /usr/bin/bat
 echo -e '\nexport DSTAT_OPTS="-cdngym"' >> /etc/profile.d/z99-initsmhp.sh
 
