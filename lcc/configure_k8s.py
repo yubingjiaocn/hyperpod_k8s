@@ -22,7 +22,7 @@ else:
     sudo_command = ["sudo","-E"]
 
 # Prefix of SecretsManager secret name
-secret_name = "hyperpod-k8s-"
+secret_name = "hyperpod-k8s"
 
 # Configuration for retries and timeout
 join_info_timeout = 5 * 60 # 5min
